@@ -1,50 +1,217 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-    <title>Career Search</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Career Search - CareerPathMK</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            padding: 30px;
-            background-color: #f4f4f4;
+        .search-container {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .search-header {
             text-align: center;
+            margin-bottom: 2rem;
+            animation: fadeInDown 0.8s ease;
         }
-        input, button {
-            padding: 10px;
-            margin: 10px;
-            width: 300px;
-            font-size: 16px;
+
+        .search-header h1 {
+            color: var(--secondary-color);
+            margin-bottom: 1rem;
+            font-size: 2.5rem;
         }
-        #results {
-            margin-top: 20px;
-            text-align: left;
-            max-width: 600px;
-            margin-left: auto;
-            margin-right: auto;
+
+        .search-header p {
+            color: var(--text-color);
+            font-size: 1.1rem;
+            opacity: 0.8;
         }
-        .career-card {
-            background: white;
-            padding: 15px;
-            margin-bottom: 10px;
+
+        #searchForm {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 2rem;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            animation: fadeInUp 1s ease;
+        }
+
+        #searchForm:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        #searchInput {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e0e0e0;
             border-radius: 8px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background-color: #f8f9fa;
+            margin-bottom: 1rem;
+        }
+
+        #searchInput:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.2);
+            background-color: white;
+        }
+
+        #searchForm button {
+            width: 100%;
+            padding: 1rem;
+            background: linear-gradient(135deg, var(--primary-color) 0%, #357abd 100%);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        #searchForm button:hover {
+            background: linear-gradient(135deg, #357abd 0%, var(--primary-color) 100%);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(74, 144, 226, 0.3);
+        }
+
+        #results {
+            margin-top: 2rem;
+            animation: fadeIn 1.2s ease;
+        }
+
+        .career-card {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .career-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+
+        .career-card h2 {
+            color: var(--secondary-color);
+            margin-bottom: 1.5rem;
+            font-size: 1.8rem;
+            border-bottom: 2px solid #f0f0f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .career-card p {
+            margin: 1rem 0;
+            line-height: 1.6;
+            color: var(--text-color);
+        }
+
+        .career-card strong {
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            color: var(--text-color);
+            font-size: 1.1rem;
+        }
+
+        .logout-link {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.95);
+            padding: 0.8rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+        }
+
+        .logout-link:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes fadeInDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .search-container {
+                padding: 1rem;
+            }
+            
+            .search-header h1 {
+                font-size: 2rem;
+            }
+            
+            #searchForm {
+                padding: 1.5rem;
+            }
+            
+            .career-card {
+                padding: 1.5rem;
+            }
         }
     </style>
 </head>
 <body>
+    <a href="/logout" class="logout-link">Logout</a>
+    
+    <div class="search-container">
+        <div class="search-header">
+            <h1>Explore Your Career Path</h1>
+            <p>Discover careers that match your skills and interests</p>
+        </div>
+        
+        <form id="searchForm">
+            <input type="text" id="searchInput" placeholder="Enter career field, skills, or courses..." required>
+            <button type="submit">Search Careers</button>
+        </form>
 
-    <h1>Explore Your Career Path</h1>
-
-    <form id="searchForm">
-        <input type="text" id="searchInput" placeholder="Enter career field..." required>
-        <button type="submit">Search</button>
-    </form>
-
-    <div id="results"></div>
+        <div id="results"></div>
+    </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>
-
 </body>
 </html>
