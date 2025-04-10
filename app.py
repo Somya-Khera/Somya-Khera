@@ -7,44 +7,35 @@ import os
 import atexit
 
 app = Flask(__name__)
-app.secret_key = os.environ.get('SECRET_KEY', "this will work!!")  # Replace this in production
+app.secret_key = os.environ.get('SECRET_KEY', "this will work!!")  # Replace in production
 
-# Debugging: Print the database name being used
-DATABASE_NAME = "careerpathdb"
-print(f"Connecting to database: {DATABASE_NAME}")
+# Database credentials
+DB_HOST = "sql12.freesqldatabase.com"
+DB_USER = "sql12771575"
+DB_PASSWORD = "SWC73NZGtV"  # Replace with your actual password
+DB_NAME = "sql12771575"
 
-# Create database if it doesn't exist
-try:
-    db_create = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="1234"
-    )
-    cursor_create = db_create.cursor()
-    cursor_create.execute(f"CREATE DATABASE IF NOT EXISTS {DATABASE_NAME}")
-    db_create.commit()
-except mysql.connector.Error as err:
-    print(f"Database creation error: {err}")
-    exit(1)
-finally:
-    if db_create:
-        db_create.close()
-    if cursor_create:
-        cursor_create.close()
 
-# Connect to the created database
-db = None  # Initialize db to None
-cursor = None  # Initialize cursor to None
-try:
-    db = mysql.connector.connect(
-        host="localhost",
-        user="root",
-        password="1234",
-        database=DATABASE_NAME  # Ensure the correct database name is used here
-    )
+# Function to connect to the database
+def connect_to_db():
+    try:
+        db = mysql.connector.connect(
+            host=DB_HOST,
+            user=DB_USER,
+            password=DB_PASSWORD,
+            database=DB_NAME
+        )
+        return db
+    except mysql.connector.Error as err:
+        print(f"Remote DB connection error: {err}")
+        return None
+
+# Initialize database connection
+db = connect_to_db()
+if db:
     cursor = db.cursor()
-except mysql.connector.Error as err:
-    print(f"Database connection error: {err}")
+else:
+    cursor = None
     exit(1)
 
 # Close the database connection when the application exits
@@ -56,7 +47,7 @@ def close_db():
 
 atexit.register(close_db)
 
-# Create tables
+# Create tables if they don't exist
 try:
     cursor.execute("""
         CREATE TABLE IF NOT EXISTS users (
@@ -110,11 +101,10 @@ def signup():
             return redirect(url_for("career_search"))
         except IntegrityError:
             flash("Email already exists.")
-            return redirect(url_for("signup"))
         except mysql.connector.Error as err:
             print(f"Database error during signup: {err}")
             flash("Database error occurred.")
-            return redirect(url_for("signup"))
+        return redirect(url_for("signup"))
 
     return render_template("signup.html")
 
@@ -134,11 +124,10 @@ def login():
                 return redirect(url_for("career_search"))
 
             flash("Invalid credentials.")
-            return redirect(url_for("login"))
         except mysql.connector.Error as err:
             print(f"Database error during login: {err}")
             flash("Database error occurred.")
-            return redirect(url_for("login"))
+        return redirect(url_for("login"))
 
     return render_template("login.html")
 
@@ -194,7 +183,7 @@ def search():
             } for row in results]
             return {"results": careers}
 
-        return {"message": "No matching careers found"}, 404
+        return {"message": "No matching careers found"}
 
     except mysql.connector.Error as err:
         print(f"Database error during search: {err}")
